@@ -1,1 +1,42 @@
 On 11 th april i started practise coding.
+
+--- 
+ -name: Install nginx on pathnex server
+  hosts: all
+  become: yes
+
+  tasks:
+    -name: Intsall nginx
+     yum 
+       name: nginx
+       state: present
+
+      Terraform task 
+
+      provider "aws" {
+        region = "us-east-1"
+      }  
+
+      resources = "aws_instance" "PathnexEC2" {
+        ami    = " ami-abcd1234abcd"
+        instance_type = "c5.xlarge"
+
+          tags = {
+            Name ="pathnex-EC2"
+          }
+      }
+
+
+
+      kubernative task 
+
+      apiversion: vi
+      Kind: pod
+      metadata:
+        name: pathnex-pod 
+        spec: 
+        containers:
+         -name: web
+         image: nginx:latest
+         ports:
+          -containerport: 80
