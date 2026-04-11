@@ -1,42 +1,116 @@
-On 11 th april i started practise coding.
+ 12 th april
 
---- 
- -name: Install nginx on pathnex server
-  hosts: all
+ --- 
+  name: Install and start Nginx on Pathnex
+  host: all
   become: yes
 
   tasks:
-    -name: Intsall nginx
-     yum 
-       name: nginx
+    -name: Install Nginx
+     yum:
+       name: Nginx
        state: present
 
-      Terraform task 
+    -name: enable Nginx
+     service:
+        name: Nginx
+        state: starded
+         enabled: yes
 
-      provider "aws" {
-        region = "us-east-1"
-      }  
 
-      resources = "aws_instance" "PathnexEC2" {
-        ami    = " ami-abcd1234abcd"
-        instance_type = "c5.xlarge"
+         provider "aws" {
+         region = "us-east-1"
+         }
+     
+     resource "aws_instance" "PathnexEC2"{
+     ami     = "ami-0abcd1234abcd1234"
+     instance_type = "r5.2xlarge"
+     
+     tags = {
+     Name   = "pathnex-server"
+     Environment = "training"
+     owner   = "pathnexStudent"
 
-          tags = {
-            Name ="pathnex-EC2"
-          }
+     }
+     
+  }
+
+  apiversion:apps/v1
+  kind: deployment
+  metadat:
+    name: Pathnex-deployment
+    spec:
+    replica: 2
+    selector:
+    matchlabels:
+      app: Pathnex-app
+
+      tmeplate:
+      metadata:
+       lables:
+
+       app: pathnex-appspecs:
+         containers:
+          -name: app
+           image: nginx 
+           ports:
+             - containerport: 80
+
+
+
+  #!/bin/bash
+  df-h  -- disk space
+
+  pipeline{
+    agent any 
+    tools{
+      maven 'Maven-3.8,1'
+       jdk 'JDK-17'
+    }
+     stages{
+      stages('checkout'){
+         steps {
+          git url:
+
+         }
       }
 
+      stage('complice'){
+        steps {
+          sh 'mvcn clean complice'
 
+        }
+      }
+      stage('Test') {
+        steps{
+          sh 'mvn test'
 
-      kubernative task 
+        }
+      }
+      stage('package') {
+        steps {
+           sh 'mvn package'
 
-      apiversion: vi
-      Kind: pod
-      metadata:
-        name: pathnex-pod 
-        spec: 
-        containers:
-         -name: web
-         image: nginx:latest
-         ports:
-          -containerport: 80
+        }
+      }
+     }
+  }
+  stages:
+   -build
+   -test-package
+   maven-build:
+    stage:buildimage: maven:3,8,1-jdk -17
+    script:
+      -git clone 
+      -cd sample-java-app-mvn clean complice
+      maven-test:
+
+       stage: testimage: maven:3,8,1-jdk-17
+       scripst:
+       -cd sample-java-app-mvn test 
+
+       maven package  stage: package 
+       image: maven:3.8.1-jdk-17
+       script:
+        -cd sample-jave-app
+        -mvn package
