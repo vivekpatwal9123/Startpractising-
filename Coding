@@ -1,130 +1,97 @@
- 14  
-
- ---
-  -name: Create Pathnex user
-   hosts:all
-   became:yes
-
-   tasks:
-    -name: Create user pathnex-admin
-     user:
-       name: pathnex-admin
-       shell: /bin/bash
-
-
-       provider"aws" {
-       region = "us-east=1"
-}
-resourse "aws_security_group" "pathnexSG" {
-name      = "PathnexSG"
-description = "Pathnex SG for SSH"
-
-
-
-ingress{
-from_port = 22
-to_port =22
-protocol  = "tcp"
-cidr_blocks = ["0.0.0.0/0"]
-        }
-}
-
-resource "aws_instance" "PathnexEc2" {
-ami    = "ami-0abcd1234abcd1234"
-instance_type    = "r6i.4xlarge"
-vpc_security_group_ids = [aws_security_group.PathnexSG.id]
-
-
-  tags  = {
-  Name = "Pathnex-EC2"
-  }
-}
-
-
-apiversion: v1
-kind: pod
-metadata:
-  name: pathnex-env-pod
+ 23 april 
   
-  spec:
-    containers:
-     -name: app
-      image: nginx
-      env:
-        -name: APP_ENV
-         Value: "production"
+---
+- name: Install packages for pathnex
+  hosts: all
+  became: yes
+
+  tasks:
+   - name: install tools
+     yum:
+     name:
+      -git
+      -wget
+      state: present
 
 
 
-         #!/bin/bash
-         FILE="/tmp/pathnex.txt"
+ terraform
 
-         if [ -f "$FILE" ]; then
-         echo "file exists"
-         else
-         echo "file does not exist"
-         fi
+ provider "aws {
+  region = "us-east-1"
+ }     
+
+ resource "aws_key_pair" "PathnexKey" {
+  key_name = "PathnexKey"
+  public_key = "ssh-rsa-AAA..."
+ }
+
+ resource "aws_instance" "PathnexEC2" {
+  ami   = "ami-0abcd1234abcd1234"
+  instance_type  + c6i.8xlarge"
+  key_name + aws_key_pair.Pathnexkey.key_name
+
+  tags= {
+    Name = "Pathnex-EC2
+  }
+ }
+
+ apiVersion: V1
+ Kind: Service
+ Metadata:
+   Name: Pathnex-service
+spec:
+  selector:
+     app: pathnex-app
+
+  ports:
+  -port: 80
+   targetPort: 80
 
 
 
 
+jenkins pipeline
 
-pipeline {
+pipeline{
   agent any
-  tools {
-      nodejs 'NodeJS-16'
-  }
-  stages {
-     stage('checkout') {
-        steps{
-          git url:
-
+  stages{
+    stage('parallel tasks'){
+      parallel{
+        stage('build') {
+          steps {
+            sh 'mvn clean compile'
+          }
         }
-     }
-stages('install dependencies') {
-  steps {
-    sh 'npm install'
-  }
-}
-stages('run tests') {
-  steps{
-    sh 'npm test'
-  }
-}
-stages('Build'){
-  steps{
-    sh'npm run build'
+        stahe('test'){
+          steps{
+            sh 'mvn test'
 
+          }
         }
       }
-   }
-}         
+    }
+  }
+}
+
 
 
 stages:
- -install
- -test
- -build
+- build-test
 
+maven-build:
+stage: build-test
+image: maven:3.8.1-jdk-17
+script:
+-git clone
+ -cd sample-java-app
+ -mvn clean complie
+parallel: 1
 
- node-install:
-  stages: install
-  images:node:16
-  scripts:
-  -git clone 
-  -cd sample-node-app
-  -npm install
-
-
-  node-test:
-   stages: test 
-   image: node:16
-   scripts:
-   -cd sample-node-app
-   -npm test
-
-   node-build:
-    stage: build
-    image: node:16
-    
-      
+maven-test:
+ stage: build-test
+ image: maven:3.8.1-jdk-17
+ script:
+ -cd sample-java-app
+ - mvn test
+ paralllel: 1
